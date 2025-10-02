@@ -30,21 +30,20 @@ data class Task(
 
 @Composable
 fun TaskToDoList() {
-    // Active tasks
+    // Tracking Tasks
     var taskToDoList by rememberSaveable { mutableStateOf(listOf<Task>()) }
-
-    // Completed tasks
+    // Tracking Completed Tasks
     val taskToDoDone = remember { mutableStateListOf<Task>() }
-
+    //  An incrementer so that we can track each task by a number
+    //  Allows us tasks with the same name, since each one has it's
+    //  own tag
     var nextID by rememberSaveable { mutableStateOf(0) }
 
-    // Add a new task
     fun addTask(text: String) {
         taskToDoList = taskToDoList + Task(task = text, isDone = false, taskID = nextID)
         nextID++
     }
 
-    // Toggle task between done/undone
     fun toggleTask(id: Int) {
         taskToDoList = taskToDoList.map { task ->
             if (task.taskID == id) {
@@ -58,13 +57,6 @@ fun TaskToDoList() {
             } else task
         }
     }
-
-    // Remove task completely
-    fun removeTask(id: Int) {
-        taskToDoList = taskToDoList.filter { it.taskID != id }
-        taskToDoDone.removeIf { it.taskID == id }
-    }
-
     // Here you would call a Composable to show the UI
     TaskToDoScreen(
         tasks = taskToDoList,
