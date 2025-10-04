@@ -12,13 +12,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.todolist.ui.theme.ToDoListTheme
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
+            ToDoListTheme{
+                TaskToDoList()
+            }
         }
     }
 }
@@ -30,37 +39,29 @@ data class Task(
 
 @Composable
 fun TaskToDoList() {
-    // Tracking Tasks
-    var taskToDoList by rememberSaveable { mutableStateOf(listOf<Task>()) }
-    // Tracking Completed Tasks
-    val taskToDoDone = remember { mutableStateListOf<Task>() }
-    //  An incrementer so that we can track each task by a number
-    //  Allows us tasks with the same name, since each one has it's
-    //  own tag
-    var nextID by rememberSaveable { mutableStateOf(0) }
+    //  tTD is short for taskToDo
+    val tTDList = rememberSaveable { mutableStateListOf<Task>() } // ----- Tracking Tasks
+    val tTDDone = rememberSaveable { mutableStateListOf<Task>() } // ----- Tracking Completed Tasks
+    var nextID by rememberSaveable { mutableIntStateOf(0) } // -------------- Incrementer
 
+    //  Self-explanatory function
     fun addTask(text: String) {
-        taskToDoList = taskToDoList + Task(task = text, isDone = false, taskID = nextID)
+        tTDList.add(Task(task = text, isDone = false, taskID = nextID))
         nextID++
     }
 
     fun toggleTask(id: Int) {
-        taskToDoList = taskToDoList.map { task ->
-            if (task.taskID == id) {
-                val updatedTask = task.copy(isDone = !task.isDone)
-                if (updatedTask.isDone) {
-                    taskToDoDone.add(updatedTask) // add to completed
-                } else {
-                    taskToDoDone.removeIf { it.taskID == id } // remove from completed if undone
-                }
-                updatedTask
-            } else task
-        }
+        
     }
-    // Here you would call a Composable to show the UI
+
+    fun removeTask(id: Int) {
+        tTDList.removeIf { it.taskID == id }
+        tTDDone.removeIf { it.taskID == id }
+    }
+
     TaskToDoScreen(
-        tasks = taskToDoList,
-        completedTasks = taskToDoDone,
+        tasks = tTDList,
+        completedTasks = tTDDone,
         onAdd = ::addTask,
         onToggle = ::toggleTask,
         onRemove = ::removeTask
